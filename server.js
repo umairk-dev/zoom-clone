@@ -1,4 +1,5 @@
 const express = require('express')
+var validator = require('validator');
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
@@ -23,12 +24,20 @@ app.set('view engine','ejs')
 app.use(express.static('public'))
 
 app.get('/', (req,res) => {
-    res.redirect(`/room/${uuidV4()}`)
+    res.render('home')
 })
 
+app.get('/create', (req,res) =>{
+    res.redirect(`/room/${uuidV4()}`)
+   // res.redirect(`/room/roomid`)
+})
 
 app.get('/room/:room',(req, res) =>{
-    res.render('room',{roomId: req.params.room})
+    if(validator.isUUID(req.params.room))
+        res.render('room',{roomId: req.params.room})
+    else
+        res.render('home',{error: "Invalid Room ID " + req.params.room})
+ 
 })
 
 io.on('connection', socket => {
