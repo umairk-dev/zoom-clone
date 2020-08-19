@@ -2,17 +2,32 @@ const express = require('express')
 const app = express()
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
+var ExpressPeerServer = require('peer').ExpressPeerServer;
 
-//const { v4: uuidV4 } = require('uuid')
+var options = {
+    debug: true
+}
+
+//app.use('/peerjs', ExpressPeerServer(server, options));
+peerServer = ExpressPeerServer(server, options)
+app.use('/peerjs', peerServer);
+
+peerServer.on('connection', function(id) {
+    console.log(id)
+  console.log(server._clients)
+});
+
+
+const { v4: uuidV4 } = require('uuid')
 app.set('view engine','ejs')
 app.use(express.static('public'))
 
 app.get('/', (req,res) => {
-    res.redirect(`/aaaaaa`)
+    res.redirect(`/room/${uuidV4()}`)
 })
 
 
-app.get('/:room',(req, res) =>{
+app.get('/room/:room',(req, res) =>{
     res.render('room',{roomId: req.params.room})
 })
 
@@ -26,5 +41,6 @@ io.on('connection', socket => {
         })
     })
 })
+
 
 server.listen(3000)
